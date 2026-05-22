@@ -17,8 +17,14 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd ~/All_Services_App
-            git pull origin main
-            cd servixo/all-services
-            docker-compose down
+            cd ~/All_Services_App/servixo/all-services
+
+            # Force stop and remove old containers
+            docker stop services-mysql services-backend || true
+            docker rm services-mysql services-backend || true
+
+            # Bring down any compose network
+            docker-compose down || true
+
+            # Rebuild and start fresh
             docker-compose up -d --build
