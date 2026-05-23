@@ -19,12 +19,12 @@ jobs:
           script: |
             cd ~/All_Services_App/servixo/all-services
 
-            # Force stop and remove old containers
-            sudo docker stop services-mysql services-backend || true
-            sudo docker rm services-mysql services-backend || true
+            # Restart docker to clear permission issues
+            sudo snap restart docker
+            sleep 10
 
-            # Bring down compose
-            sudo docker-compose down || true
+            # Force remove old containers
+            docker rm -f services-backend services-mysql || true
 
             # Rebuild and start fresh
-            sudo docker-compose up -d --build
+            docker-compose up -d --build
