@@ -95,7 +95,7 @@ const ROUTES = {
   ProviderNotifications: ProviderNotificationsScreen,
   ProviderBookingDetails: ProviderBookingDetailsScreen,
   ProviderLiveTracking: ProviderLiveTrackingScreen,
-  PersonalInformation: PersonalInformationScreen,  // ← add this
+  PersonalInformation: PersonalInformationScreen,
   ForgotPassword: ForgotPasswordScreen,
   Home: HomeScreen,
   PersonalDetails: PersonalDetailsScreen,
@@ -158,8 +158,9 @@ const ROUTES = {
 
 const NAV_STATE_KEY = "servixo.currentRoute";
 const DEFAULT_ENTRY = { routeName: "Login", params: {} };
-const AUTH_ENTRY_ROUTES = new Set(["SignIn", "Signup", "SignupAllInOne"]);
-const LOCAL_WEB_ORIGIN = "http://192.168.29.170:8081";
+
+// ✅ FIXED: Use public server IP instead of local LAN IP (192.168.29.170)
+const PUBLIC_WEB_ORIGIN = "http://40.192.103.12:8081";
 
 const canUseWebStorage = () => typeof window !== "undefined" && !!window.localStorage;
 
@@ -170,7 +171,8 @@ const redirectHttpsTunnelToLocalWeb = () => {
 
   const { protocol, hostname, hash } = window.location;
   if (protocol === "https:" && hostname.endsWith(".exp.direct")) {
-    window.location.replace(`${LOCAL_WEB_ORIGIN}${hash || "#/Login"}`);
+    // ✅ FIXED: redirect to public IP, not local LAN
+    window.location.replace(`${PUBLIC_WEB_ORIGIN}${hash || "#/Login"}`);
   }
 };
 
@@ -218,7 +220,6 @@ export default function App() {
         if (!ROUTES[routeName]) {
           return;
         }
-
         setStack((prev) => [...prev, { routeName, params }]);
       },
       goBack: () => {
@@ -226,21 +227,17 @@ export default function App() {
           if (prev.length > 1) {
             return prev.slice(0, -1);
           }
-
           const currentRoute = prev[0]?.routeName;
           if (currentRoute && currentRoute !== "Home" && currentRoute !== "Login") {
             return [{ routeName: "Home", params: {} }];
           }
-
           return prev;
         });
       },
-      canGoBack: () => stack.length > 1 || !["Home", "Login"].includes(currentEntry.routeName),
+      canGoBack: () =>
+        stack.length > 1 || !["Home", "Login"].includes(currentEntry.routeName),
       reset: (config, params = {}) => {
-        // Handle both styles:
-        // Style 1 (React Navigation): navigation.reset({ index: 0, routes: [{ name: 'Login' }] })
-        // Style 2 (simple string):    navigation.reset('Login')
-        if (typeof config === 'object' && config !== null) {
+        if (typeof config === "object" && config !== null) {
           const routeName = config?.routes?.[0]?.name;
           if (!routeName || !ROUTES[routeName]) return;
           setStack([{ routeName, params: config?.routes?.[0]?.params || {} }]);
