@@ -1,0 +1,34 @@
+
+services:
+  mysql-db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: servixo
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  backend:
+    build: ./services-backend
+    env_file:
+      - ./services-backend/.env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql-db
+
+  frontend:
+    build: ./services
+    env_file:
+      - ./services/.env
+    ports:
+      - "19006:19006"
+    depends_on:
+      - backend
+
+volumes:
+  mysql-data:

@@ -1,0 +1,7 @@
+Starting project at D:\bgu\servixo\all-services\services
+Starting Metro Bundler
+Waiting on http://localhost:8083
+Logs for your project will appear below.
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 814ms index.js (517 modules)
+ LOG  [web] Logs will appear in the browser console
