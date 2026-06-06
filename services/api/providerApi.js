@@ -4,14 +4,13 @@
 // // BASE URL CONFIGURATION
 // // ─────────────────────────────────────────────────────────────────────────────
 // // Change this to match your environment:
-// //   Android Emulator  → 'http://10.0.2.2:8080'
+// //   Android Emulator  → 'http://40.192.103.12:8080'
 // //   iOS Simulator     → 'http://localhost:8080'
-// //   Physical Device   → 'http://<YOUR_PC_LAN_IP>:8080'  e.g. 'http://192.168.0.28:8080'
 // //
 // // ✅ FIX: Split into two base URLs — auth endpoints live under /api/provider/auth
 // //         but categories (and other provider endpoints) live under /api/provider
-// const BASE_AUTH_URL = 'http://192.168.0.13:8080/api/provider/auth';
-// const BASE_PROVIDER_URL = 'http://192.168.0.13:8080/api/provider';
+// const BASE_AUTH_URL = 'http://40.192.103.12:8080/api/provider/auth';
+// const BASE_PROVIDER_URL = 'http://40.192.103.12:8080/api/provider';
 
 // // ─────────────────────────────────────────────────────────────────────────────
 // // TOKEN HELPERS
@@ -332,14 +331,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
-const LAN_API_HOST = '3.110.250.107';
+const LAN_API_HOST = '40.192.103.12';
 const getPrimaryApiHost = () => {
     if (Platform.OS === 'web' && typeof window !== 'undefined') {
         const host = window.location?.hostname;
         if (
             host &&
-            host !== '3.110.250.107' &&
-            host !== '3.110.250.107' &&
+            host !== '40.192.103.12' &&
+            host !== '40.192.103.12' &&
             !host.endsWith('.exp.direct')
         ) {
             return host;
@@ -354,9 +353,9 @@ const isHttpsWeb = () =>
 const API_HOST = getPrimaryApiHost();
 const API_HOSTS = Array.from(new Set([
     API_HOST,
-    ...(Platform.OS === 'web' ? ['3.110.250.107', '3.110.250.107'] : []),
+    ...(Platform.OS === 'web' ? ['40.192.103.12', '40.192.103.12'] : []),
     LAN_API_HOST,
-    ...(Platform.OS === 'android' ? ['3.110.250.107'] : []),
+    ...(Platform.OS === 'android' ? ['40.192.103.12'] : []),
 ]));
 const API_ORIGINS = isHttpsWeb()
     ? []

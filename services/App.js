@@ -159,7 +159,7 @@ const ROUTES = {
 const NAV_STATE_KEY = "servixo.currentRoute";
 const DEFAULT_ENTRY = { routeName: "Login", params: {} };
 const AUTH_ENTRY_ROUTES = new Set(["SignIn", "Signup", "SignupAllInOne"]);
-const LOCAL_WEB_ORIGIN = "http://192.168.29.170:8081";
+const LOCAL_WEB_ORIGIN = "http://40.192.103.12:8081";
 
 const canUseWebStorage = () => typeof window !== "undefined" && !!window.localStorage;
 

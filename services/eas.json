@@ -1,0 +1,26 @@
+{
+  "cli": {
+    "appVersionSource": "local"
+  },
+  "build": {
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "http://40.192.103.12:8080",
+        "EXPO_PUBLIC_API_URL": "http://40.192.103.12:8080"
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "http://40.192.103.12:8080",
+        "EXPO_PUBLIC_API_URL": "http://40.192.103.12:8080"
+      },
+      "android": {
+        "buildType": "app-bundle"
+      }
+    }
+  }
+}

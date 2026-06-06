@@ -489,7 +489,7 @@ import BottomNavBar from "../components/BottomNavBar";
 import providerApi from "../api/providerApi";
 import { getOwnerColors, t } from "../styles/ownerPreferences";
 
-const API_BASE_URL = "http://192.168.29.170:8080/api/wallet";
+const API_BASE_URL = "http://40.192.103.12:8080/api/wallet";
 const USER_MOBILE = "9876543210"; // replace with logged-in user mobile
 
 const withColorAliases = (colors) => ({
