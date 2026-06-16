@@ -25,11 +25,9 @@ jobs:
 
             cd /home/ubuntu/All-Services
 
-            echo "Pulling latest code..."
             git fetch origin main
             git reset --hard origin/main
 
-            echo "Writing env files..."
             cat > services-backend/.env <<'ENVEOF'
             ${{ secrets.BACKEND_ENV }}
             ENVEOF
@@ -38,7 +36,6 @@ jobs:
             ${{ secrets.FRONTEND_ENV }}
             ENVEOF
 
-            echo "Building backend jar..."
             cd /home/ubuntu/All-Services/services-backend
             chmod +x mvnw 2>/dev/null || true
             if [ -f mvnw ]; then
@@ -47,15 +44,9 @@ jobs:
               mvn clean package -DskipTests
             fi
 
-            echo "Restarting Docker containers..."
             cd /home/ubuntu/All-Services
             docker compose up -d --build
 
-            echo "Checking containers..."
+            sleep 25
             docker compose ps
-
-            echo "Testing backend..."
-            sleep 20
             curl -i http://localhost:8080 || true
-
-            echo "Deployment completed."
