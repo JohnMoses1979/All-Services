@@ -20,11 +20,10 @@ jobs:
         run: |
           set -euo pipefail
 
-          echo "Going to project..."
           cd /home/ubuntu/All-Services
 
           echo "Pulling latest code..."
-          git config --global --add safe.directory /home/ubuntu/All-Services
+          git config --global --add safe.directory /home/ubuntu/All-Services || true
           git fetch origin main
           git reset --hard origin/main
 
@@ -47,13 +46,17 @@ jobs:
             mvn clean package -DskipTests
           fi
 
-          echo "Deploying containers without docker compose down..."
+          echo "Removing old backend/frontend containers only..."
           cd /home/ubuntu/All-Services
 
+          sudo docker rm -f all-services-backend-1 all-services-frontend-1 2>/dev/null || true
+
+          echo "Deploying containers..."
           sudo docker compose up -d --build --remove-orphans || {
-            echo "Docker compose failed once. Restarting Docker and retrying..."
+            echo "Docker failed. Restarting Docker and retrying..."
             sudo systemctl restart docker
             sleep 20
+            sudo docker rm -f all-services-backend-1 all-services-frontend-1 2>/dev/null || true
             sudo docker compose up -d --build --remove-orphans
           }
 
