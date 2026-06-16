@@ -20,24 +20,28 @@ jobs:
         run: |
           set -euo pipefail
 
-          cd /home/ubuntu/All-Services
+          PROJECT_DIR="/home/ubuntu/All-Services"
 
-          echo "Pulling latest code..."
-          git config --global --add safe.directory /home/ubuntu/All-Services || true
+          echo "Going to project"
+          cd "$PROJECT_DIR"
+
+          echo "Pulling latest code"
+          git config --global --add safe.directory "$PROJECT_DIR" || true
           git fetch origin main
           git reset --hard origin/main
 
-          echo "Writing env files..."
+          echo "Writing backend env"
           cat > services-backend/.env <<'ENVEOF'
           ${{ secrets.BACKEND_ENV }}
           ENVEOF
 
+          echo "Writing frontend env"
           cat > services/.env <<'ENVEOF'
           ${{ secrets.FRONTEND_ENV }}
           ENVEOF
 
-          echo "Building backend jar..."
-          cd /home/ubuntu/All-Services/services-backend
+          echo "Building backend jar"
+          cd "$PROJECT_DIR/services-backend"
           chmod +x mvnw 2>/dev/null || true
 
           if [ -f mvnw ]; then
@@ -46,31 +50,25 @@ jobs:
             mvn clean package -DskipTests
           fi
 
-          echo "Removing old backend/frontend containers only..."
-          cd /home/ubuntu/All-Services
+          echo "Restart Docker and deploy"
+          cd "$PROJECT_DIR"
+
+          sudo systemctl restart docker
+          sleep 25
 
           sudo docker rm -f all-services-backend-1 all-services-frontend-1 2>/dev/null || true
 
-          echo "Deploying containers..."
-          sudo docker compose up -d --build --remove-orphans || {
-            echo "Docker failed. Restarting Docker and retrying..."
-            sudo systemctl restart docker
-            sleep 20
-            sudo docker rm -f all-services-backend-1 all-services-frontend-1 2>/dev/null || true
-            sudo docker compose up -d --build --remove-orphans
-          }
-
-          echo "Waiting for backend..."
+          sudo docker compose up -d mysql-db
           sleep 30
+
+          sudo docker compose up -d --build backend frontend
+          sleep 45
 
           sudo docker compose ps
           sudo docker compose logs --tail=80 backend
-
-          echo "Testing backend..."
-          curl -i http://localhost:8080 || true
 
           curl -i -X POST http://localhost:8080/api/owner/auth/signin \
             -H "Content-Type: application/json" \
             -d '{"mobile":"9963795242","password":"12345"}' || true
 
-          echo "Deployment completed."
+          echo "Deployment completed successfully"
