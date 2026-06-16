@@ -17,25 +17,31 @@ jobs:
       - name: Deploy using SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
+          host: 40.192.103.12
+          username: ubuntu
+          port: 22
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
 
+            echo "Going to project folder..."
             cd /home/ubuntu/All-Services
 
+            echo "Pulling latest code..."
             git fetch origin main
             git reset --hard origin/main
 
+            echo "Writing backend env..."
             cat > services-backend/.env <<'ENVEOF'
             ${{ secrets.BACKEND_ENV }}
             ENVEOF
 
+            echo "Writing frontend env..."
             cat > services/.env <<'ENVEOF'
             ${{ secrets.FRONTEND_ENV }}
             ENVEOF
 
+            echo "Building backend jar..."
             cd /home/ubuntu/All-Services/services-backend
             chmod +x mvnw 2>/dev/null || true
             if [ -f mvnw ]; then
@@ -44,9 +50,15 @@ jobs:
               mvn clean package -DskipTests
             fi
 
+            echo "Restarting Docker containers..."
             cd /home/ubuntu/All-Services
             docker compose up -d --build
 
+            echo "Checking containers..."
             sleep 25
             docker compose ps
+
+            echo "Testing backend..."
             curl -i http://localhost:8080 || true
+
+            echo "Deployment completed successfully."
