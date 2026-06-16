@@ -5,60 +5,69 @@ on:
     branches:
       - main
 
+concurrency:
+  group: all-services-deploy
+  cancel-in-progress: true
+
 jobs:
   deploy:
-    name: Deploy to EC2
-    runs-on: ubuntu-latest
+    name: Deploy on EC2 self-hosted runner
+    runs-on: self-hosted
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Deploy latest code
+        shell: bash
+        run: |
+          set -euo pipefail
 
-      - name: Deploy using SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: 40.192.103.12
-          username: ubuntu
-          port: 22
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            set -e
+          echo "Going to project..."
+          cd /home/ubuntu/All-Services
 
-            echo "Going to project folder..."
-            cd /home/ubuntu/All-Services
+          echo "Pulling latest code..."
+          git config --global --add safe.directory /home/ubuntu/All-Services
+          git fetch origin main
+          git reset --hard origin/main
 
-            echo "Pulling latest code..."
-            git fetch origin main
-            git reset --hard origin/main
+          echo "Writing env files..."
+          cat > services-backend/.env <<'ENVEOF'
+          ${{ secrets.BACKEND_ENV }}
+          ENVEOF
 
-            echo "Writing backend env..."
-            cat > services-backend/.env <<'ENVEOF'
-            ${{ secrets.BACKEND_ENV }}
-            ENVEOF
+          cat > services/.env <<'ENVEOF'
+          ${{ secrets.FRONTEND_ENV }}
+          ENVEOF
 
-            echo "Writing frontend env..."
-            cat > services/.env <<'ENVEOF'
-            ${{ secrets.FRONTEND_ENV }}
-            ENVEOF
+          echo "Building backend jar..."
+          cd /home/ubuntu/All-Services/services-backend
+          chmod +x mvnw 2>/dev/null || true
 
-            echo "Building backend jar..."
-            cd /home/ubuntu/All-Services/services-backend
-            chmod +x mvnw 2>/dev/null || true
-            if [ -f mvnw ]; then
-              ./mvnw clean package -DskipTests
-            else
-              mvn clean package -DskipTests
-            fi
+          if [ -f mvnw ]; then
+            ./mvnw clean package -DskipTests
+          else
+            mvn clean package -DskipTests
+          fi
 
-            echo "Restarting Docker containers..."
-            cd /home/ubuntu/All-Services
-            docker compose up -d --build
+          echo "Deploying containers without docker compose down..."
+          cd /home/ubuntu/All-Services
 
-            echo "Checking containers..."
-            sleep 25
-            docker compose ps
+          sudo docker compose up -d --build --remove-orphans || {
+            echo "Docker compose failed once. Restarting Docker and retrying..."
+            sudo systemctl restart docker
+            sleep 20
+            sudo docker compose up -d --build --remove-orphans
+          }
 
-            echo "Testing backend..."
-            curl -i http://localhost:8080 || true
+          echo "Waiting for backend..."
+          sleep 30
 
-            echo "Deployment completed successfully."
+          sudo docker compose ps
+          sudo docker compose logs --tail=80 backend
+
+          echo "Testing backend..."
+          curl -i http://localhost:8080 || true
+
+          curl -i -X POST http://localhost:8080/api/owner/auth/signin \
+            -H "Content-Type: application/json" \
+            -d '{"mobile":"9963795242","password":"12345"}' || true
+
+          echo "Deployment completed."
