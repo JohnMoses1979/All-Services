@@ -22,25 +22,24 @@ jobs:
 
           PROJECT_DIR="/home/ubuntu/All-Services"
 
-          echo "Going to project"
+          echo "Go to project"
           cd "$PROJECT_DIR"
 
-          echo "Pulling latest code"
+          echo "Pull latest code"
           git config --global --add safe.directory "$PROJECT_DIR" || true
           git fetch origin main
           git reset --hard origin/main
 
-          echo "Writing backend env"
+          echo "Write env files"
           cat > services-backend/.env <<'ENVEOF'
           ${{ secrets.BACKEND_ENV }}
           ENVEOF
 
-          echo "Writing frontend env"
           cat > services/.env <<'ENVEOF'
           ${{ secrets.FRONTEND_ENV }}
           ENVEOF
 
-          echo "Building backend jar"
+          echo "Build backend jar"
           cd "$PROJECT_DIR/services-backend"
           chmod +x mvnw 2>/dev/null || true
 
@@ -50,23 +49,35 @@ jobs:
             mvn clean package -DskipTests
           fi
 
-          echo "Restart Docker and deploy"
           cd "$PROJECT_DIR"
 
-          sudo systemctl restart docker
-          sleep 25
-
+          echo "Clean old backend/frontend containers"
+          sudo docker compose stop backend frontend 2>/dev/null || true
+          sudo docker compose rm -sf backend frontend 2>/dev/null || true
           sudo docker rm -f all-services-backend-1 all-services-frontend-1 2>/dev/null || true
 
+          echo "If container lock exists, restart Docker"
+          if sudo docker ps -a --format '{{.Names}}' | grep -E 'all-services-backend-1|all-services-frontend-1'; then
+            sudo systemctl restart docker
+            sleep 25
+            sudo docker rm -f all-services-backend-1 all-services-frontend-1 2>/dev/null || true
+          fi
+
+          echo "Start MySQL"
           sudo docker compose up -d mysql-db
           sleep 30
 
+          echo "Build and start backend/frontend"
           sudo docker compose up -d --build backend frontend
           sleep 45
 
+          echo "Container status"
           sudo docker compose ps
+
+          echo "Backend logs"
           sudo docker compose logs --tail=80 backend
 
+          echo "Test backend login"
           curl -i -X POST http://localhost:8080/api/owner/auth/signin \
             -H "Content-Type: application/json" \
             -d '{"mobile":"9963795242","password":"12345"}' || true

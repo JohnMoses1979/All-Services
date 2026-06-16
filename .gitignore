@@ -79,3 +79,22 @@ services-backend/target/
 actions-runner/
 _runner_work/
 _runner_file_commands/
+
+# GitHub runner - never push
+actions-runner/
+_runner_work/
+_runner_file_commands/
+
+# secrets
+.env
+*.env
+services/.env
+services-backend/.env
+
+# build/cache
+node_modules/
+services/node_modules/
+.expo/
+dist/
+target/
+services-backend/target/
