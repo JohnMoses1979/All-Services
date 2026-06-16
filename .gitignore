@@ -1,36 +1,23 @@
-.env
-services-backend/.env
-.env
-services-backend/.env
-.env
-services/.env
-services-backend/.env
-
-# local env/secrets
-.env
-*.env
-services/.env
-services-backend/.env
-docker-compose.override.yml
-
-# dependencies/build/cache
+# dependencies
 node_modules/
 services/node_modules/
-services-backend/target/
-.expo/
-npm-debug.log
 
-.env
-*.env
-services/.env
-services-backend/.env
-docker-compose.override.yml
-
-.env
-*.env
-services/.env
-services-backend/.env
-node_modules/
+# expo/react native
 .expo/
 dist/
+web-build/
 android/app/build/
+services/android/app/build/
+
+# env secrets
+.env
+*.env
+services/.env
+services-backend/.env
+
+# backend build files
+services-backend/target/
+
+# logs
+*.log
+npm-debug.log*
