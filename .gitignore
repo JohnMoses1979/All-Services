@@ -21,3 +21,42 @@ services-backend/target/
 # logs
 *.log
 npm-debug.log*
+
+# GitHub self-hosted runner - never commit
+actions-runner/
+_runner_file_commands/
+_runner_work/
+
+# secrets
+.env
+*.env
+services/.env
+services-backend/.env
+
+# build/cache
+node_modules/
+services/node_modules/
+.expo/
+dist/
+target/
+services-backend/target/
+actions-runner/
+_runner_file_commands/
+_runner_work/
+
+# secrets - never push
+.env
+*.env
+services/.env
+services-backend/.env
+
+# build/cache/runner - never push
+node_modules/
+services/node_modules/
+.expo/
+dist/
+target/
+services-backend/target/
+actions-runner/
+_runner_file_commands/
+_runner_work/
