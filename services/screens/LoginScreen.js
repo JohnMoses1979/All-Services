@@ -157,7 +157,7 @@ const LoginScreen = ({ navigation }) => {
                     <Image source={require("../assets/worker.png")} style={styles.workerChoiceImage} />
                   </View>
                   <View style={styles.choiceTextWrap}>
-                    <Text style={styles.choiceTitle}>Worker</Text>
+                    <Text style={styles.choiceTitle}>Centra</Text>
                     <Text style={styles.choiceSubtitle}>Jobs, schedule, earnings, profile</Text>
                   </View>
                 </TouchableOpacity>

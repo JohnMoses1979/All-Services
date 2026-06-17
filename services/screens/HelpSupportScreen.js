@@ -246,7 +246,7 @@ function HelpHomeScreen({ onOpenGuide, onOpenChat, onOpenContact }) {
             <Ionicons name="call-outline" size={27} color={COLORS.purple} />
           </View>
           <Text style={styles.supportTitle}>Call Us</Text>
-          <Text style={styles.supportSub}>+91 9014047419</Text>
+          <Text style={styles.supportSub}>+91 9876543210</Text>
         </TouchableOpacity>
       </View>
 
@@ -384,7 +384,7 @@ function ContactScreen({ onOpenChat }) {
   const contactItems = [
     {
       title: "Call Us",
-      subtitle: "+91 9014047419\n9:00 AM - 9:00 PM",
+      subtitle: "+91 9876543210\n9:00 AM - 9:00 PM",
       icon: "call-outline",
       color: COLORS.purple,
       onPress: () => Linking.openURL("tel:+919876543210"),
@@ -394,7 +394,7 @@ function ContactScreen({ onOpenChat }) {
       subtitle: "+91 98765 43210\n9:00 AM - 9:00 PM",
       icon: "logo-whatsapp",
       color: OWNER_COLORS.primary,
-      onPress: () => Linking.openURL("https://wa.me/919014047419"),
+      onPress: () => Linking.openURL("https://wa.me/919876543210"),
     },
     {
       title: "Email Us",
