@@ -98,3 +98,20 @@ services/node_modules/
 dist/
 target/
 services-backend/target/
+
+# secrets
+.env
+*.env
+services/.env
+services-backend/.env
+
+# runner/build/cache
+actions-runner/
+_runner_work/
+_runner_file_commands/
+node_modules/
+services/node_modules/
+.expo/
+dist/
+target/
+services-backend/target/

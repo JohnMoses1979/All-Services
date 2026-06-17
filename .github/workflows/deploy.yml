@@ -13,65 +13,13 @@ jobs:
   deploy:
     name: Deploy on EC2 self-hosted runner
     runs-on: self-hosted
+    timeout-minutes: 20
 
     steps:
-      - name: Deploy latest code
+      - name: Run deployment script
         shell: bash
+        env:
+          BACKEND_ENV: ${{ secrets.BACKEND_ENV }}
+          FRONTEND_ENV: ${{ secrets.FRONTEND_ENV }}
         run: |
-          set -euo pipefail
-
-          PROJECT_DIR="/home/ubuntu/All-Services"
-
-          echo "Go to project"
-          cd "$PROJECT_DIR"
-
-          echo "Pull latest code"
-          git config --global --add safe.directory "$PROJECT_DIR" || true
-          git fetch origin main
-          git reset --hard origin/main
-
-          echo "Write env files"
-          cat > services-backend/.env <<'ENVEOF'
-          ${{ secrets.BACKEND_ENV }}
-          ENVEOF
-
-          cat > services/.env <<'ENVEOF'
-          ${{ secrets.FRONTEND_ENV }}
-          ENVEOF
-
-          echo "Build backend jar"
-          cd "$PROJECT_DIR/services-backend"
-          chmod +x mvnw 2>/dev/null || true
-
-          if [ -f mvnw ]; then
-            ./mvnw clean package -DskipTests
-          else
-            mvn clean package -DskipTests
-          fi
-
-          echo "Restart Docker cleanly"
-          cd "$PROJECT_DIR"
-          sudo systemctl restart docker
-          sleep 35
-
-          echo "Clean old compose containers"
-          sudo docker compose down --remove-orphans --timeout 30 || true
-
-          echo "Deploy fresh containers"
-          sudo docker compose up -d --build
-
-          echo "Wait for backend"
-          sleep 60
-
-          echo "Container status"
-          sudo docker compose ps
-
-          echo "Backend logs"
-          sudo docker compose logs --tail=80 backend
-
-          echo "Test backend login"
-          curl -i -X POST http://localhost:8080/api/owner/auth/signin \
-            -H "Content-Type: application/json" \
-            -d '{"mobile":"9963795242","password":"12345"}' || true
-
-          echo "CI/CD deployment completed successfully"
+          bash /home/ubuntu/All-Services/scripts/deploy.sh
