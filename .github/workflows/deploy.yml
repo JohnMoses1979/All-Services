@@ -49,21 +49,19 @@ jobs:
             mvn clean package -DskipTests
           fi
 
-          echo "Restart Docker to clear container lock"
+          echo "Restart Docker cleanly"
           cd "$PROJECT_DIR"
           sudo systemctl restart docker
           sleep 35
 
-          echo "Remove old app containers"
-          sudo docker rm -f all-services-backend-1 all-services-frontend-1 2>/dev/null || true
+          echo "Clean old compose containers"
+          sudo docker compose down --remove-orphans --timeout 30 || true
 
-          echo "Start MySQL"
-          sudo docker compose up -d mysql-db
-          sleep 30
+          echo "Deploy fresh containers"
+          sudo docker compose up -d --build
 
-          echo "Build/start backend and frontend"
-          sudo docker compose up -d --build backend frontend
-          sleep 45
+          echo "Wait for backend"
+          sleep 60
 
           echo "Container status"
           sudo docker compose ps
